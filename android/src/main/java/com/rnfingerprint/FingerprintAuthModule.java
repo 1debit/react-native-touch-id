@@ -10,6 +10,8 @@ import com.facebook.react.bridge.ReadableMap;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -67,27 +69,21 @@ public class FingerprintAuthModule extends ReactContextBaseJavaModule {
   public void authenticate(String reason, ReadableMap authConfig, Callback reactErrorCallback, Callback reactSuccessCallback) {
     if (!inProgress) {
       inProgress = true;
-      keyguardManager =
-      (KeyguardManager) getCurrentActivity().getSystemService(Context.KEYGUARD_SERVICE);
-      fingerprintManager =
-      (FingerprintManager) getCurrentActivity().getSystemService(Context.FINGERPRINT_SERVICE);
-
       Activity activity = getCurrentActivity();
+      keyguardManager = (KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
+      fingerprintManager = (FingerprintManager) activity.getSystemService(Context.FINGERPRINT_SERVICE);
+
 
       if (isFingerprintAuthAvailable()) {
         generateKey();
         if (cipherInit()) {
           cryptoObject = new FingerprintManager.CryptoObject(cipher);
-          fingerprintDialog = new FingerprintDialog();
-          fingerprintDialog.setCryptoObject(cryptoObject);
+
 
           DialogResultHandler drh = new DialogResultHandler(reactErrorCallback, reactSuccessCallback);
 
-          fingerprintDialog.setReasonForAuthentication(reason);
-          fingerprintDialog.setAuthConfig(authConfig);
-          fingerprintDialog.setDialogCallback(drh);
+          fingerprintDialog = new FingerprintDialog(activity, cryptoObject, drh, reason, authConfig);
 
-          fingerprintDialog.show(activity.getFragmentManager(),"fingerprint_dialog");
         }
       }
 
