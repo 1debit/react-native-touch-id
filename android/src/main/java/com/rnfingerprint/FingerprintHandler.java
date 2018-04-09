@@ -24,9 +24,16 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     }
 
     public boolean isFingerprintAuthAvailable() {
-        return (android.os.Build.VERSION.SDK_INT >= 23)
-                && mFingerprintManager.isHardwareDetected()
-                && mFingerprintManager.hasEnrolledFingerprints();
+        try {
+            return (android.os.Build.VERSION.SDK_INT >= 23)
+                    && mFingerprintManager.isHardwareDetected()
+                    && mFingerprintManager.hasEnrolledFingerprints();
+        }
+        catch(java.lang.SecurityException ex) {
+            // this catch is due to issues with Samsung devices.
+            // https://app.bugsnag.com/chime/react-native/errors/5ac7132bca857f001a46f859
+            return false;
+        }
     }
 
     public void startAuth(FingerprintManager.CryptoObject cryptoObject) {
