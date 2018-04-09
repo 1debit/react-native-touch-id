@@ -53,14 +53,22 @@ public class FingerprintAuthModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void isSupported(Callback reactErrorCallback, Callback reactSuccessCallback) {
-    keyguardManager =
-            (KeyguardManager) getCurrentActivity().getSystemService(Context.KEYGUARD_SERVICE);
-    fingerprintManager =
-            (FingerprintManager) getCurrentActivity().getSystemService(Context.FINGERPRINT_SERVICE);
-    if(!isFingerprintAuthAvailable()) {
-      reactErrorCallback.invoke("Not supported.");
-    } else {
-      reactSuccessCallback.invoke("Is supported.");
+    if (getCurrentActivity() != null) {
+      keyguardManager =
+              (KeyguardManager) getCurrentActivity().getSystemService(Context.KEYGUARD_SERVICE);
+      fingerprintManager =
+              (FingerprintManager) getCurrentActivity().getSystemService(Context.FINGERPRINT_SERVICE);
+      if(!isFingerprintAuthAvailable()) {
+        reactErrorCallback.invoke("Not supported.");
+      } else {
+        reactSuccessCallback.invoke("Is supported.");
+      }
+    }
+    else {
+      // in some cases getCurrentActivity() might return null. So instead NullPointerExcpetion, let
+      // just default back to touch id not supported...
+      // https://app.bugsnag.com/chime/react-native/errors/5aba69a7282944001b1ebf1f
+      reactErrorCallback.invoke("Not supported.");  
     }
     return ;
   }
