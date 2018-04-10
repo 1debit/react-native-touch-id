@@ -8,6 +8,8 @@ import android.os.CancellationSignal;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
+import java.lang.SecurityException;
+
 public class FingerprintHandler extends FingerprintManager.AuthenticationCallback {
 
     private CancellationSignal cancellationSignal;
@@ -29,9 +31,9 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
                     && mFingerprintManager.isHardwareDetected()
                     && mFingerprintManager.hasEnrolledFingerprints();
         }
-        catch(java.lang.SecurityException ex) {
-            // this catch is due to issues with Samsung devices.
-            // https://app.bugsnag.com/chime/react-native/errors/5ac7132bca857f001a46f859
+        catch(SecurityException ex) {
+            // this catch is due to issues with Samsung devices
+            // like here: https://stackoverflow.com/questions/37780080/android-fingerprints-hasenrolledfingerprints-triggers-exception-on-some-samsung 
             return false;
         }
     }
