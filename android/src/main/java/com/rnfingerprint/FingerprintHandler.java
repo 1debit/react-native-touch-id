@@ -31,7 +31,7 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
                     && mFingerprintManager.isHardwareDetected()
                     && mFingerprintManager.hasEnrolledFingerprints();
         }
-        catch(SecurityException ex) {
+        catch (SecurityException ex) {
             // this catch is due to issues with Samsung devices
             // like here: https://stackoverflow.com/questions/37780080/android-fingerprints-hasenrolledfingerprints-triggers-exception-on-some-samsung 
             return false;
