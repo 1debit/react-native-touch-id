@@ -8,6 +8,8 @@ import android.os.CancellationSignal;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
+import java.lang.SecurityException;
+
 public class FingerprintHandler extends FingerprintManager.AuthenticationCallback {
 
     private CancellationSignal cancellationSignal;
@@ -24,9 +26,16 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     }
 
     public boolean isFingerprintAuthAvailable() {
-        return (android.os.Build.VERSION.SDK_INT >= 23)
-                && mFingerprintManager.isHardwareDetected()
-                && mFingerprintManager.hasEnrolledFingerprints();
+        try {
+            return (android.os.Build.VERSION.SDK_INT >= 23)
+                    && mFingerprintManager.isHardwareDetected()
+                    && mFingerprintManager.hasEnrolledFingerprints();
+        }
+        catch (SecurityException ex) {
+            // this catch is due to issues with Samsung devices
+            // like here: https://stackoverflow.com/questions/37780080/android-fingerprints-hasenrolledfingerprints-triggers-exception-on-some-samsung 
+            return false;
+        }
     }
 
     public void startAuth(FingerprintManager.CryptoObject cryptoObject) {
