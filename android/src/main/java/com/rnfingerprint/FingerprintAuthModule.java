@@ -29,6 +29,7 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.InvalidAlgorithmParameterException;
 import java.io.IOException;
+import java.lang.SecurityException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -36,6 +37,7 @@ import javax.crypto.SecretKey;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.UnrecoverableKeyException;
+
 
 public class FingerprintAuthModule extends ReactContextBaseJavaModule {
 
@@ -113,15 +115,20 @@ public class FingerprintAuthModule extends ReactContextBaseJavaModule {
       if (android.os.Build.VERSION.SDK_INT < 23) {
           return false;
       }
-
-      if (!keyguardManager.isKeyguardSecure()) {
-          return false;
+      try {
+            if (!keyguardManager.isKeyguardSecure()) {
+                return false;
+            }
+      
+            if (!fingerprintManager.hasEnrolledFingerprints()) {
+                return false;
+            }
       }
-
-      if (!fingerprintManager.hasEnrolledFingerprints()) {
-          return false;
+      catch (SecurityException ex) {
+            // this catch is due to issues with Samsung devices
+            // like here: https://stackoverflow.com/questions/37780080/android-fingerprints-hasenrolledfingerprints-triggers-exception-on-some-samsung 
+            return false;
       }
-
       return true;
   }
 
