@@ -120,7 +120,7 @@ public class FingerprintAuthModule extends ReactContextBaseJavaModule {
                 return false;
             }
       
-            if (!fingerprintManager.hasEnrolledFingerprints()) {
+            if (!(fingerprintManager.isHardwareDetected() && fingerprintManager.hasEnrolledFingerprints())) {
                 return false;
             }
       }
