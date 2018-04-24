@@ -70,26 +70,31 @@ public class FingerprintAuthModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void authenticate(String reason, ReadableMap authConfig, Callback reactErrorCallback, Callback reactSuccessCallback) {
     if (!inProgress) {
-      inProgress = true;
-      Activity activity = getCurrentActivity();
-      keyguardManager = (KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
-      fingerprintManager = (FingerprintManager) activity.getSystemService(Context.FINGERPRINT_SERVICE);
+        try {
+            inProgress = true;
+            Activity activity = getCurrentActivity();
+            keyguardManager = (KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
+            fingerprintManager = (FingerprintManager) activity.getSystemService(Context.FINGERPRINT_SERVICE);
 
 
-      if (isFingerprintAuthAvailable()) {
-        generateKey();
-        if (cipherInit()) {
-          cryptoObject = new FingerprintManager.CryptoObject(cipher);
+            if (isFingerprintAuthAvailable()) {
+                generateKey();
+                if (cipherInit()) {
+                    cryptoObject = new FingerprintManager.CryptoObject(cipher);
+                    
 
+                    DialogResultHandler drh = new DialogResultHandler(reactErrorCallback, reactSuccessCallback);
 
-          DialogResultHandler drh = new DialogResultHandler(reactErrorCallback, reactSuccessCallback);
+                    fingerprintDialog = new FingerprintDialog(activity, cryptoObject, drh, reason, authConfig);
 
-          fingerprintDialog = new FingerprintDialog(activity, cryptoObject, drh, reason, authConfig);
+                }
+            }
 
+            return;
         }
-      }
-
-      return;
+        catch (RuntimeException ex) {
+            reactErrorCallback.invoke("Unknown Error");
+        }
 
     }
   }
@@ -116,6 +121,11 @@ public class FingerprintAuthModule extends ReactContextBaseJavaModule {
           return false;
       }
       try {
+            // if device has inacactive fingerprint hardware, this case might happen
+            if (keyguardManager == null || fingerprintManager == null) {
+                return false;
+            }
+
             if (!keyguardManager.isKeyguardSecure()) {
                 return false;
             }
