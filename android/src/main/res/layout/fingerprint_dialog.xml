@@ -39,7 +39,7 @@
             android:layout_height="49dp"
             android:layout_marginLeft="25dp"
             android:gravity="left"
-            android:src="@drawable/ic_fp_40px" />
+            android:src="@drawable/ic_fp_40px_touch_id" />
 
         <TextView
             android:id="@+id/fingerprint_description"
